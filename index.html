@@ -62,6 +62,10 @@ td input{padding:7px 9px}
 .card.hl{animation:pop .45s ease;border-left:5px solid var(--acc)}
 .card.hl-new{border-left-color:var(--red)}.card.hl-work{border-left-color:#e08a00}.card.hl-wait{border-left-color:#7b8089}.card.hl-est{border-left-color:var(--acc)}
 @keyframes pop{0%{transform:scale(.97);opacity:.4}100%{transform:none;opacity:1}}
+.dupbox{background:#fff8e6;border:1px solid #f0d28a;border-radius:14px;padding:14px;margin:12px 0}.dupi{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #f0d28a;margin-top:8px}.dupbox>.btn{margin-top:8px}
+.mass{display:inline-block;margin-top:6px;background:#fff3d6;color:#8a5200;border:1px solid #f0c765;border-radius:10px;padding:5px 10px;font-size:13px;font-weight:600}.mass.hot{background:#ffe3e0;color:#a31d12;border-color:#f2a69f}
+.card.massc{border-left:5px solid #e08a00}.card.hotc{border-left:5px solid #d93025;background:#fffafa}
+.manybar{width:100%;margin:0 0 14px;padding:12px 14px;border-radius:14px;border:1px solid #f0c765;background:#fff3d6;color:#8a5200;font-size:15px;cursor:pointer;text-align:left}.manybar b{font-size:17px}
 </style>
 </head>
 <body>
@@ -80,9 +84,16 @@ var db;try{db=JSON.parse(LS.get('officeTasks')||'null')}catch(e){db=null}
 db=db||seed();
 var role='emp',cat=-1,filter='all',openId=null,user=LS.get('officeUser')||'';
 function seed(){return[
-{id:1,cat:1,title:'Холодно в кабинете',loc:'3 этаж, к. 312',who:'Анна',desc:'Батарея еле тёплая.',st:'work',pri:'high',t:Date.now()-86400000,items:[]},
+{id:1,cat:1,title:'Холодно в кабинете',loc:'3 этаж, к. 312',who:'Анна',desc:'Батарея еле тёплая.',st:'work',pri:'high',t:Date.now()-86400000,items:[],also:[{who:'Пётр',text:'У нас тоже холодно',t:Date.now()-5400000},{who:'Ольга',text:'Сидим в куртках',t:Date.now()-3000000}]},
 {id:2,cat:3,title:'Течёт кран',loc:'2 этаж, кухня',who:'Игорь',desc:'Капает смеситель.',st:'wait',pri:'norm',t:Date.now()-7200000,items:[{n:'Смеситель',q:1,p:3200},{n:'Сантехнический сифон',q:2,p:450}]},
 {id:3,cat:0,title:'Не горит лампа',loc:'1 этаж, к. 104',who:'Мария',desc:'Над столом у окна.',st:'new',pri:'norm',t:Date.now()-3600000,items:[]}]}
+function nl(l){var t=String(l||'').toLowerCase(),n=t.match(/\d+/g)||[],w=t.replace(/\d+/g,' ').split(/[^а-яa-zё]+/).filter(function(x){return x.length>2&&!/^(этаж|кабинет|каб|комната|ком|офис)$/.test(x)}).map(function(x){return x.slice(0,5)});return{cab:n.filter(function(x){return x.length>=3})[0]||'',fl:n.filter(function(x){return x.length<3})[0]||'',w:w}}
+function sameLoc(a,b){var x=nl(a),y=nl(b);if(x.cab&&y.cab)return x.cab==y.cab;var ws=x.w.some(function(k){return y.w.indexOf(k)>=0});if(x.fl&&y.fl&&x.fl!=y.fl)return false;if(x.cab||y.cab){var c=x.cab||y.cab,f=(x.cab?y:x);return !!f.fl&&c.charAt(0)==f.fl&&!f.w.length||ws}return ws||(!!x.fl&&x.fl==y.fl&&!x.w.length&&!y.w.length)}
+function openT(){return db.filter(function(x){return x.st!='done'})}
+function similar(c,l,skip){return openT().filter(function(x){return x.id!=skip&&x.cat==c&&sameLoc(x.loc,l)})}
+function pl(n){var m=n%10,c=n%100;return n+' '+(m==1&&c!=11?'человек':'человека')}
+function who(x){var n=cnt(x);return(n>=3?'Массовая проблема: ':'Уже ')+'пожаловались '+pl(n)+(n>=3?' — разберите в первую очередь':'')}
+function cnt(x){return 1+(x.also||[]).length}
 function save(){LS.set('officeTasks',JSON.stringify(db,function(k,v){return k=='vids'?undefined:v}))}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2200)}
 function mode(m){role=m;openId=null;t1.className=m=='emp'?'on':'';t2.className=m=='mgr'?'on':'';t3.className=m=='boss'?'on':'';render()}
@@ -93,16 +104,29 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;
 function render(){role=='emp'?emp():role=='mgr'?mgr():boss()}
 
 function emp(){
- var h='<h2>Что случилось?</h2><div class="card"><div class="cats">'+CATS.map(function(c,i){return'<button class="cat'+(cat==i?' on':'')+'" onclick="cat='+i+';render()"><span class="e">'+c[0]+'</span>'+c[1]+'</button>'}).join('')+'</div>'
- +'<div class="row"><div><label>Ваше имя</label><input id="who" value="'+esc(user)+'"></div><div><label>Где (этаж, кабинет)</label><input id="loc" placeholder="3 этаж, к. 312"></div></div>'
+ var h='<h2>Что случилось?</h2><div class="card"><div class="cats">'+CATS.map(function(c,i){return'<button class="cat'+(cat==i?' on':'')+'" onclick="cat='+i+';render();chk()"><span class="e">'+c[0]+'</span>'+c[1]+'</button>'}).join('')+'</div>'
+ +'<div class="row"><div><label>Ваше имя</label><input id="who" value="'+esc(user)+'"></div><div><label>Где (этаж, кабинет)</label><input id="loc" placeholder="3 этаж, к. 312" oninput="chk()"></div></div><div id="dup"></div>'
  +'<label>Что именно</label><textarea id="desc" placeholder="Коротко опишите проблему или идею"></textarea>'
  +'<label>Фото или видео (необязательно)</label><input type="file" id="files" accept="image/*,video/*" multiple><div class="meta" id="fcnt"></div>'
  +'<label>Срочность</label><select id="pri"><option value="norm">Обычная</option><option value="high">Срочно</option></select><br><br>'
  +'<button class="btn" onclick="add()">Отправить офис-менеджеру</button></div>'
  +'<h2>Мои заявки</h2>';
- var mine=db.filter(function(x){return !user||x.who==user});
+ var mine=db.filter(function(x){return !user||x.who==user||(x.also||[]).some(function(a){return a.who==user})});
  h+=mine.length?mine.slice().sort(function(a,b){return b.t-a.t}).map(function(x){return'<div class="card tk"><div><h3>'+CATS[x.cat][0]+' '+esc(x.title)+'</h3><div class="meta">'+esc(x.loc)+' · '+ago(x.t)+'</div></div><span class="pill '+ST[x.st][1]+'">'+ST[x.st][0]+'</span></div>'}).join(''):'<div class="empty">Пока нет заявок</div>';
  app.innerHTML=h}
+var force=false;
+function chk(){var b=document.getElementById('dup');if(!b)return [];var l=(document.getElementById('loc')||{}).value||'';var r=(cat>=0&&l.trim().length>1)?similar(cat,l):[];
+ b.innerHTML=r.length?'<div class="dupbox"><b>⚠️ Похоже, об этом уже сообщили</b><div class="meta">Откройте и присоединитесь — менеджер увидит, что проблема касается нескольких человек, а повторная заявка не создастся.</div>'+r.map(function(x){return'<div class="dupi"><div><b>'+CATS[x.cat][0]+' '+esc(x.title)+'</b><div class="meta">'+esc(x.loc)+' · '+esc(x.who)+' · '+ago(x.t)+' · '+ST[x.st][0]+(cnt(x)>1?' · сообщили: '+cnt(x):'')+'</div></div><button class="btn sm" onclick="joinT('+x.id+')">Это та же проблема</button></div>'}).join('')+'<button class="btn sec sm" onclick="force=true;add()">Нет, у меня другая — отправить новую</button></div>':'';
+ return r}
+function joinT(id){var x=find(id),w=(document.getElementById('who').value||'').trim(),d=(document.getElementById('desc').value||'').trim();
+ if(!w){toast('Укажите ваше имя');return}user=w;LS.set('officeUser',w);
+ if(x.who==w||(x.also||[]).some(function(a){return a.who==w})){toast('Вы уже сообщали об этом');return}
+ (x.also=x.also||[]).push({who:w,text:d,t:Date.now()});if(document.getElementById('pri').value=='high')x.pri='high';
+ save();cat=-1;force=false;toast('Вы присоединились к заявке — дублей не будет');render()}
+function mergeT(keep,gone){var a=find(keep),b=find(gone);if(!a||!b)return;
+ (a.also=a.also||[]).push({who:b.who,text:b.desc,t:b.t});(b.also||[]).forEach(function(z){a.also.push(z)});
+ a.media=(a.media||[]).concat(b.media||[]);a.vids=(a.vids||[]).concat(b.vids||[]);a.items=a.items.concat(b.items||[]);if(b.pri=='high')a.pri='high';
+ db=db.filter(function(x){return x.id!=gone});openId=keep;save();toast('Заявки объединены');render()}
 function mediaHtml(x){
  var a=(x.media||[]).map(function(m){return'<img src="'+m+'" onclick="this.classList.toggle(\'big\')">'}).concat((x.vids||[]).map(function(u){return'<video src="'+u+'" controls playsinline preload="metadata"></video>'}));
  return a.length?'<div class="media">'+a.join('')+'</div>':''}
@@ -112,10 +136,15 @@ function add(){
  var w=who.value.trim(),l=loc.value.trim();
  if(!w||!l){toast('Укажите имя и место');return}
  user=w;LS.set('officeUser',w);
+ var sm=similar(cat,l);
+ if(sm.length&&!force){chk();toast('Проверьте: возможно, это уже есть');var bx=document.getElementById('dup');if(bx.scrollIntoView)bx.scrollIntoView({behavior:'smooth',block:'center'});return}
+ var mine=sm.filter(function(x){return x.who==w||(x.also||[]).some(function(a){return a.who==w})});
+ if(mine.length&&force&&!confirm('Вы уже отправляли похожую заявку. Отправить ещё одну?')){return}
+ force=false;
  var d=desc.value.trim();
  var task={id:Date.now(),cat:cat,title:CATS[cat][1]+(d?': '+d.slice(0,40):''),loc:l,who:w,desc:d,st:'new',pri:pri.value,t:Date.now(),items:[],media:[],vids:[]};
  var fl=Array.prototype.slice.call(files.files||[]),left=fl.length;
- function fin(){db.push(task);save();cat=-1;toast('Заявка отправлена');render()}
+ function fin(){db.push(task);force=false;save();cat=-1;toast('Заявка отправлена');render()}
  if(!left){fin();return}
  fl.forEach(function(f){
   if(f.type.indexOf('video')==0){task.vids.push(URL.createObjectURL(f));if(!--left)fin()}
@@ -124,17 +153,20 @@ function add(){
 function setF(k){filter=(filter==k?'all':k);render();var f=document.querySelector('.filters');if(f&&f.scrollIntoView)f.scrollIntoView({behavior:'smooth',block:'start'})}
 function mgr(){
  var c={all:db.length};for(var k in ST)c[k]=db.filter(function(x){return x.st==k}).length;
+ var many=db.filter(function(x){return x.st!='done'&&cnt(x)>1}).length;
  var total=db.reduce(function(a,x){return a+sum(x)},0);
  function tile(k,n,t){return'<button class="stat st-'+k+(filter==k?' on':'')+'" onclick="setF(\''+k+'\')"><b>'+n+'</b>'+t+'</button>'}
- var h='<h2>Заявки</h2><div class="stats">'+tile('new',c.new,'новых')+tile('work',c.work,'в работе')+tile('wait',c.wait,'ждут закупки')+tile('est',money(total),'смета всего')+'</div>'
+ var h='<h2>Заявки</h2><div class="stats">'+tile('new',c.new,'новых')+tile('work',c.work,'в работе')+tile('wait',c.wait,'ждут закупки')+tile('est',money(total),'смета всего')+'</div>'+(many?'<button class="manybar" onclick="setF(\'many\')">👥 Жалоб от нескольких человек: <b>'+many+'</b> — показать</button>':'')
  +'<div class="filters">'+[['all','Все']].concat(Object.keys(ST).map(function(k){return[k,ST[k][0]]})).map(function(f){return'<button class="'+(filter==f[0]?'on':'')+'" onclick="filter=\''+f[0]+'\';render()">'+f[1]+'</button>'}).join('')+'</div>';
- var list=db.filter(function(x){return filter=='all'||(filter=='est'?sum(x)>0:x.st==filter)}).sort(function(a,b){return(b.pri=='high')-(a.pri=='high')||b.t-a.t});
- h+=list.length?list.map(function(x){return filter=='all'?card(x):card(x).replace('<div class="card">','<div class="card hl hl-'+filter+'">')}).join(''):'<div class="empty">Нет заявок</div>';
+ var list=db.filter(function(x){return filter=='all'||(filter=='est'?sum(x)>0:filter=='many'?(x.st!='done'&&cnt(x)>1):x.st==filter)}).sort(function(a,b){return(b.pri=='high')-(a.pri=='high')||cnt(b)-cnt(a)||b.t-a.t});
+ h+=list.length?list.map(function(x){return filter=='all'?(cnt(x)>1?card(x).replace('<div class="card">','<div class="card massc'+(cnt(x)>=3?' hotc':'')+'">'):card(x)):card(x).replace('<div class="card">','<div class="card hl hl-'+filter+'">')}).join(''):'<div class="empty">Нет заявок</div>';
  app.innerHTML=h}
 function card(x){
- var o=openId==x.id,h='<div class="card"><div class="tk" onclick="openId='+(o?'null':x.id)+';render()"><div><h3>'+CATS[x.cat][0]+' '+esc(x.title)+(x.pri=='high'?' <span class="pill s-new">срочно</span>':'')+'</h3><div class="meta">'+esc(x.loc)+' · '+esc(x.who)+' · '+ago(x.t)+(sum(x)?' · смета '+money(sum(x)):'')+'</div></div><span class="pill '+ST[x.st][1]+'">'+ST[x.st][0]+'</span></div>';
+ var o=openId==x.id,h='<div class="card"><div class="tk" onclick="openId='+(o?'null':x.id)+';render()"><div><h3>'+CATS[x.cat][0]+' '+esc(x.title)+(x.pri=='high'?' <span class="pill s-new">срочно</span>':'')+'</h3><div class="meta">'+esc(x.loc)+' · '+esc(x.who)+' · '+ago(x.t)+(sum(x)?' · смета '+money(sum(x)):'')+'</div>'+(cnt(x)>1?'<div class="mass'+(cnt(x)>=3?' hot':'')+'">👥 '+who(x)+'</div>':'')+'</div><span class="pill '+ST[x.st][1]+'">'+ST[x.st][0]+'</span></div>';
  if(o){
-  h+='<div class="detail">'+(x.desc?'<p>'+esc(x.desc)+'</p>':'')+mediaHtml(x)
+  var dp=similar(x.cat,x.loc,x.id).filter(function(z){return x.st!='done'});
+  h+='<div class="detail">'+(x.desc?'<p>'+esc(x.desc)+'</p>':'')+(x.also||[]).map(function(a){return'<p class="meta">➕ '+esc(a.who)+' · '+ago(a.t)+(a.text?': '+esc(a.text):'')+'</p>'}).join('')+mediaHtml(x)
+  +(dp.length?'<div class="dupbox"><b>⚠️ Возможные дубли</b>'+dp.map(function(z){return'<div class="dupi"><div>'+esc(z.title)+'<div class="meta">'+esc(z.loc)+' · '+esc(z.who)+'</div></div><button class="btn sec sm" onclick="mergeT('+x.id+','+z.id+')">Объединить сюда</button></div>'}).join('')+'</div>':'')
   +'<label>Статус</label><select onchange="setSt('+x.id+',this.value)">'+Object.keys(ST).map(function(k){return'<option value="'+k+'"'+(k==x.st?' selected':'')+'>'+ST[k][0]+'</option>'}).join('')+'</select>'
   +'<label>Смета расходов</label><table><tr><th>Позиция</th><th style="width:70px">Кол-во</th><th style="width:100px">Цена, ₽</th><th style="width:100px">Сумма</th><th></th></tr>'
   +x.items.map(function(i,n){return'<tr><td><input value="'+esc(i.n)+'" onchange="upd('+x.id+','+n+',\'n\',this.value)"></td><td><input type="number" min="0" value="'+i.q+'" onchange="upd('+x.id+','+n+',\'q\',this.value)"></td><td><input type="number" min="0" value="'+i.p+'" onchange="upd('+x.id+','+n+',\'p\',this.value)"></td><td>'+money((+i.q||0)*(+i.p||0))+'</td><td><button class="btn sec sm" onclick="del('+x.id+','+n+')">✕</button></td></tr>'}).join('')+'</table>'
