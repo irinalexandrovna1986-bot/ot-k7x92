@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Офис-задачник (прототип)</title>
+<style>
+:root{--ink:#1d1d1f;--mut:#6e6e73;--bg:#e9ebee;--line:rgba(60,70,80,.14);--acc:#059669;--acc2:#047857;--red:#d70015;--amb:#b25e00;--grn:#1d8a3e;
+--steel:linear-gradient(180deg,#fbfbfc 0%,#eceef1 48%,#dfe2e6 100%);--shadow:0 1px 0 rgba(255,255,255,.9) inset,0 1px 2px rgba(20,30,40,.08),0 8px 24px rgba(20,30,40,.07)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{font:16px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f2f3f5,#dfe2e6) fixed;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+header{background:rgba(245,246,248,.72);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.bar{max-width:980px;margin:0 auto;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-weight:600;font-size:17px;letter-spacing:-.02em;background:linear-gradient(180deg,#1f2a26,#4f6a5f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tabs{display:flex;background:rgba(120,128,140,.18);border-radius:9px;padding:2px;box-shadow:0 1px 2px rgba(0,0,0,.08) inset}
+.tabs button{background:none;border:0;color:#4a4d52;padding:6px 14px;border-radius:7px;cursor:pointer;font:inherit;font-size:14px;transition:.2s}
+.tabs button.on{background:linear-gradient(180deg,#fff,#eceef1);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.18),0 0 0 .5px rgba(0,0,0,.06)}
+main{max-width:980px;margin:0 auto;padding:28px 16px 70px}
+h2{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-bottom:16px}
+h3{font-weight:600}
+.card{background:var(--steel);border:1px solid rgba(255,255,255,.8);outline:1px solid var(--line);outline-offset:-1px;border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.cat{border:1px solid var(--line);background:linear-gradient(180deg,#fff,#eef0f3);border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;font:inherit;font-size:14px;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06);transition:.2s}
+.cat:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(20,30,40,.1)}
+.cat .e{display:block;font-size:28px;margin-bottom:2px;filter:grayscale(.25)}
+.cat.on{border-color:var(--acc);background:linear-gradient(180deg,#f1fbf6,#d3f1e3);box-shadow:0 0 0 3px rgba(5,150,105,.22)}
+label{display:block;font-size:13px;font-weight:500;color:var(--mut);margin:12px 0 5px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid rgba(60,70,80,.2);border-radius:10px;font:inherit;background:rgba(255,255,255,.92);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.05) inset;transition:.15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 4px rgba(5,150,105,.22)}
+textarea{min-height:84px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{background:linear-gradient(180deg,#2fcf93,#059669);color:#fff;border:0;padding:11px 22px;border-radius:980px;font:inherit;font-weight:500;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 2px 6px rgba(5,150,105,.38);transition:.2s}
+.btn:hover{filter:brightness(1.07)}.btn:active{transform:scale(.98)}
+.btn.sec{background:linear-gradient(180deg,#fdfdfe,#e3e6ea);color:var(--ink);box-shadow:0 1px 0 #fff inset,0 1px 3px rgba(0,0,0,.15)}
+.btn.sm{padding:6px 14px;font-size:14px}
+.tk{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;cursor:pointer}
+.tk h3{font-size:16px}
+.meta{font-size:13px;color:var(--mut)}
+.pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.s-new{background:#ffe5e8;color:var(--red)}.s-work{background:#fff0d6;color:var(--amb)}.s-done{background:#dcf5e3;color:var(--grn)}.s-ap{background:#e4e6fb;color:#3a3fb5}.s-no{background:#ffe5e8;color:var(--red)}.s-wait{background:#e3e5e9;color:#52565c}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--steel);border:1px solid rgba(255,255,255,.8);outline:1px solid var(--line);outline-offset:-1px;border-radius:16px;padding:14px 8px;text-align:center;font-size:13px;color:var(--mut);box-shadow:var(--shadow)}
+.stat b{display:block;font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.03em}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filters button{border:1px solid var(--line);background:linear-gradient(180deg,#fff,#eceef1);padding:6px 15px;border-radius:999px;cursor:pointer;font:inherit;font-size:14px;color:var(--ink);transition:.2s}
+.filters button.on{background:linear-gradient(180deg,#10b981,#047857);color:#fff;border-color:#047857;box-shadow:0 2px 6px rgba(4,120,87,.35)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+td,th{padding:6px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+td input{padding:7px 9px}
+.tot{text-align:right;font-size:20px;font-weight:700;letter-spacing:-.02em;margin-top:8px}
+.detail{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.media{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.media img,.media video{width:110px;height:84px;object-fit:cover;border-radius:12px;border:1px solid var(--line);cursor:pointer;background:#000;box-shadow:0 2px 6px rgba(0,0,0,.15)}.media .big{width:100%;height:auto;max-height:70vh;object-fit:contain}
+.empty{text-align:center;color:var(--mut);padding:36px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(40,42,46,.88);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);color:#fff;padding:11px 22px;border-radius:980px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.3);font-size:14px}
+@media(max-width:640px){.cats .cat:last-child{grid-column:1/-1}.row,.stats{grid-template-columns:1fr 1fr}h2{font-size:24px}}
+.stat{cursor:pointer;font:inherit;font-size:13px;transition:.2s;-webkit-appearance:none;appearance:none}
+.stat:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(20,30,40,.14)}.stat:active{transform:scale(.97)}
+.stat.on{background:linear-gradient(180deg,#f1fbf6,#d3f1e3);box-shadow:0 0 0 3px rgba(5,150,105,.35),0 8px 20px rgba(5,150,105,.18)}
+.stat.on b{color:var(--acc2)}
+.card.hl{animation:pop .45s ease;border-left:5px solid var(--acc)}
+.card.hl-new{border-left-color:var(--red)}.card.hl-work{border-left-color:#e08a00}.card.hl-wait{border-left-color:#7b8089}.card.hl-est{border-left-color:var(--acc)}
+@keyframes pop{0%{transform:scale(.97);opacity:.4}100%{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+<div class="logo">Офис-задачник</div>
+<div class="tabs"><button id="t1" class="on" onclick="mode('emp')">Я сотрудник</button><button id="t2" onclick="mode('mgr')">Офис-менеджер</button><button id="t3" onclick="mode('boss')">Руководитель</button></div>
+</div></header>
+<main id="app"><noscript>Включите JavaScript или откройте файл в Chrome / Safari.</noscript></main>
+<div class="toast" id="toast"></div>
+
+<script>
+var CATS=[['💡','Свет / электрика'],['🌡','Отопление'],['❄️','Кондиционер'],['🚰','Сантехника'],['🏭','Производство'],['📦','Склад'],['🍽','Кухня'],['🧹','Уборка'],['💬','Предложение']];
+var ST={new:['Новая','s-new'],work:['В работе','s-work'],wait:['Ждёт закупки','s-wait'],done:['Готово','s-done']};
+var LS={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+var db;try{db=JSON.parse(LS.get('officeTasks')||'null')}catch(e){db=null}
+db=db||seed();
+var role='emp',cat=-1,filter='all',openId=null,user=LS.get('officeUser')||'';
+function seed(){return[
+{id:1,cat:1,title:'Холодно в кабинете',loc:'3 этаж, к. 312',who:'Анна',desc:'Батарея еле тёплая.',st:'work',pri:'high',t:Date.now()-86400000,items:[]},
+{id:2,cat:3,title:'Течёт кран',loc:'2 этаж, кухня',who:'Игорь',desc:'Капает смеситель.',st:'wait',pri:'norm',t:Date.now()-7200000,items:[{n:'Смеситель',q:1,p:3200},{n:'Сантехнический сифон',q:2,p:450}]},
+{id:3,cat:0,title:'Не горит лампа',loc:'1 этаж, к. 104',who:'Мария',desc:'Над столом у окна.',st:'new',pri:'norm',t:Date.now()-3600000,items:[]}]}
+function save(){LS.set('officeTasks',JSON.stringify(db,function(k,v){return k=='vids'?undefined:v}))}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2200)}
+function mode(m){role=m;openId=null;t1.className=m=='emp'?'on':'';t2.className=m=='mgr'?'on':'';t3.className=m=='boss'?'on':'';render()}
+function ago(t){var m=Math.round((Date.now()-t)/60000);return m<60?m+' мин назад':m<1440?Math.round(m/60)+' ч назад':Math.round(m/1440)+' дн назад'}
+function sum(x){return x.items.reduce(function(a,i){return a+(+i.q||0)*(+i.p||0)},0)}
+function money(n){return Math.round(n).toLocaleString('ru-RU')+' ₽'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function render(){role=='emp'?emp():role=='mgr'?mgr():boss()}
+
+function emp(){
+ var h='<h2>Что случилось?</h2><div class="card"><div class="cats">'+CATS.map(function(c,i){return'<button class="cat'+(cat==i?' on':'')+'" onclick="cat='+i+';render()"><span class="e">'+c[0]+'</span>'+c[1]+'</button>'}).join('')+'</div>'
+ +'<div class="row"><div><label>Ваше имя</label><input id="who" value="'+esc(user)+'"></div><div><label>Где (этаж, кабинет)</label><input id="loc" placeholder="3 этаж, к. 312"></div></div>'
+ +'<label>Что именно</label><textarea id="desc" placeholder="Коротко опишите проблему или идею"></textarea>'
+ +'<label>Фото или видео (необязательно)</label><input type="file" id="files" accept="image/*,video/*" multiple><div class="meta" id="fcnt"></div>'
+ +'<label>Срочность</label><select id="pri"><option value="norm">Обычная</option><option value="high">Срочно</option></select><br><br>'
+ +'<button class="btn" onclick="add()">Отправить офис-менеджеру</button></div>'
+ +'<h2>Мои заявки</h2>';
+ var mine=db.filter(function(x){return !user||x.who==user});
+ h+=mine.length?mine.slice().sort(function(a,b){return b.t-a.t}).map(function(x){return'<div class="card tk"><div><h3>'+CATS[x.cat][0]+' '+esc(x.title)+'</h3><div class="meta">'+esc(x.loc)+' · '+ago(x.t)+'</div></div><span class="pill '+ST[x.st][1]+'">'+ST[x.st][0]+'</span></div>'}).join(''):'<div class="empty">Пока нет заявок</div>';
+ app.innerHTML=h}
+function mediaHtml(x){
+ var a=(x.media||[]).map(function(m){return'<img src="'+m+'" onclick="this.classList.toggle(\'big\')">'}).concat((x.vids||[]).map(function(u){return'<video src="'+u+'" controls playsinline preload="metadata"></video>'}));
+ return a.length?'<div class="media">'+a.join('')+'</div>':''}
+function shrink(f,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.7))};im.onerror=function(){cb(null)};im.src=r.result};r.onerror=function(){cb(null)};r.readAsDataURL(f)}
+function add(){
+ if(cat<0){toast('Выберите тип проблемы');return}
+ var w=who.value.trim(),l=loc.value.trim();
+ if(!w||!l){toast('Укажите имя и место');return}
+ user=w;LS.set('officeUser',w);
+ var d=desc.value.trim();
+ var task={id:Date.now(),cat:cat,title:CATS[cat][1]+(d?': '+d.slice(0,40):''),loc:l,who:w,desc:d,st:'new',pri:pri.value,t:Date.now(),items:[],media:[],vids:[]};
+ var fl=Array.prototype.slice.call(files.files||[]),left=fl.length;
+ function fin(){db.push(task);save();cat=-1;toast('Заявка отправлена');render()}
+ if(!left){fin();return}
+ fl.forEach(function(f){
+  if(f.type.indexOf('video')==0){task.vids.push(URL.createObjectURL(f));if(!--left)fin()}
+  else shrink(f,function(u){if(u)task.media.push(u);if(!--left)fin()})})}
+
+function setF(k){filter=(filter==k?'all':k);render();var f=document.querySelector('.filters');if(f&&f.scrollIntoView)f.scrollIntoView({behavior:'smooth',block:'start'})}
+function mgr(){
+ var c={all:db.length};for(var k in ST)c[k]=db.filter(function(x){return x.st==k}).length;
+ var total=db.reduce(function(a,x){return a+sum(x)},0);
+ function tile(k,n,t){return'<button class="stat st-'+k+(filter==k?' on':'')+'" onclick="setF(\''+k+'\')"><b>'+n+'</b>'+t+'</button>'}
+ var h='<h2>Заявки</h2><div class="stats">'+tile('new',c.new,'новых')+tile('work',c.work,'в работе')+tile('wait',c.wait,'ждут закупки')+tile('est',money(total),'смета всего')+'</div>'
+ +'<div class="filters">'+[['all','Все']].concat(Object.keys(ST).map(function(k){return[k,ST[k][0]]})).map(function(f){return'<button class="'+(filter==f[0]?'on':'')+'" onclick="filter=\''+f[0]+'\';render()">'+f[1]+'</button>'}).join('')+'</div>';
+ var list=db.filter(function(x){return filter=='all'||(filter=='est'?sum(x)>0:x.st==filter)}).sort(function(a,b){return(b.pri=='high')-(a.pri=='high')||b.t-a.t});
+ h+=list.length?list.map(function(x){return filter=='all'?card(x):card(x).replace('<div class="card">','<div class="card hl hl-'+filter+'">')}).join(''):'<div class="empty">Нет заявок</div>';
+ app.innerHTML=h}
+function card(x){
+ var o=openId==x.id,h='<div class="card"><div class="tk" onclick="openId='+(o?'null':x.id)+';render()"><div><h3>'+CATS[x.cat][0]+' '+esc(x.title)+(x.pri=='high'?' <span class="pill s-new">срочно</span>':'')+'</h3><div class="meta">'+esc(x.loc)+' · '+esc(x.who)+' · '+ago(x.t)+(sum(x)?' · смета '+money(sum(x)):'')+'</div></div><span class="pill '+ST[x.st][1]+'">'+ST[x.st][0]+'</span></div>';
+ if(o){
+  h+='<div class="detail">'+(x.desc?'<p>'+esc(x.desc)+'</p>':'')+mediaHtml(x)
+  +'<label>Статус</label><select onchange="setSt('+x.id+',this.value)">'+Object.keys(ST).map(function(k){return'<option value="'+k+'"'+(k==x.st?' selected':'')+'>'+ST[k][0]+'</option>'}).join('')+'</select>'
+  +'<label>Смета расходов</label><table><tr><th>Позиция</th><th style="width:70px">Кол-во</th><th style="width:100px">Цена, ₽</th><th style="width:100px">Сумма</th><th></th></tr>'
+  +x.items.map(function(i,n){return'<tr><td><input value="'+esc(i.n)+'" onchange="upd('+x.id+','+n+',\'n\',this.value)"></td><td><input type="number" min="0" value="'+i.q+'" onchange="upd('+x.id+','+n+',\'q\',this.value)"></td><td><input type="number" min="0" value="'+i.p+'" onchange="upd('+x.id+','+n+',\'p\',this.value)"></td><td>'+money((+i.q||0)*(+i.p||0))+'</td><td><button class="btn sec sm" onclick="del('+x.id+','+n+')">✕</button></td></tr>'}).join('')+'</table>'
+  +'<button class="btn sec sm" onclick="addI('+x.id+')">+ Позиция</button><div class="tot">Итого: '+money(sum(x))+'</div>'
+  +apBlock(x)+'<br><button class="btn sm" onclick="setSt('+x.id+',\'done\')">Отметить выполненной</button></div>'}
+ return h+'</div>'}
+function apBlock(x){
+ var h='<div class="meta" style="margin-top:10px">Согласование: ';
+ if(x.ap=='pending')h+='<span class="pill s-ap">ждёт руководителя</span>';
+ else if(x.ap=='ok')h+='<span class="pill s-done">согласовано</span>';
+ else if(x.ap=='no')h+='<span class="pill s-no">отклонено</span>'+(x.note?' — '+esc(x.note):'');
+ else h+='не отправлено';
+ h+='</div>';
+ if(sum(x)>0&&x.ap!='pending'&&x.ap!='ok')h+='<br><button class="btn sm" onclick="toAp('+x.id+')">Отправить смету на согласование</button>';
+ return h}
+function toAp(id){var x=find(id);x.ap='pending';x.note='';save();toast('Отправлено руководителю');render()}
+function boss(){
+ var p=db.filter(function(x){return x.ap=='pending'});
+ var h='<h2>На согласование</h2>';
+ h+=p.length?p.map(function(x){return'<div class="card"><h3>'+CATS[x.cat][0]+' '+esc(x.title)+'</h3><div class="meta">'+esc(x.loc)+' · '+esc(x.who)+'</div>'+mediaHtml(x)+'<table><tr><th>Позиция</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr>'+x.items.map(function(i){return'<tr><td>'+esc(i.n)+'</td><td>'+i.q+'</td><td>'+money(i.p)+'</td><td>'+money(i.q*i.p)+'</td></tr>'}).join('')+'</table><div class="tot">Итого: '+money(sum(x))+'</div><br><button class="btn sm" onclick="dec('+x.id+',true)">Согласовать</button> <button class="btn sec sm" onclick="dec('+x.id+',false)">Отклонить</button></div>'}).join(''):'<div class="empty">Нет смет на согласовании</div>';
+ var ok=db.filter(function(x){return x.ap=='ok'}).reduce(function(a,x){return a+sum(x)},0);
+ h+='<div class="card">Согласовано всего: <b>'+money(ok)+'</b></div>';
+ app.innerHTML=h}
+function dec(id,ok){var x=find(id);x.ap=ok?'ok':'no';if(ok){x.st='wait'}else{x.st='work';x.note=prompt('Причина отказа (необязательно)')||''}save();toast(ok?'Согласовано':'Отклонено');render()}
+function find(id){return db.filter(function(x){return x.id==id})[0]}
+function setSt(id,s){find(id).st=s;save();toast('Статус: '+ST[s][0]);render()}
+function addI(id){find(id).items.push({n:'',q:1,p:0});save();render()}
+function upd(id,n,f,v){find(id).items[n][f]=v;save();render()}
+function del(id,n){find(id).items.splice(n,1);save();render()}
+render();
+</script>
+</body>
+</html>
