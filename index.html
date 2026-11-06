@@ -80,13 +80,14 @@ td input{padding:7px 9px}
 var CATS=[['💡','Свет / электрика'],['🌡','Отопление'],['❄️','Кондиционер'],['🚰','Сантехника'],['🏭','Производство'],['📦','Склад'],['🍽','Кухня'],['🧹','Уборка'],['💬','Предложение']];
 var ST={new:['Новая','s-new'],work:['В работе','s-work'],wait:['Ждёт закупки','s-wait'],done:['Готово','s-done']};
 var LS={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-var db;try{db=JSON.parse(LS.get('officeTasks')||'null')}catch(e){db=null}
+var db;try{db=JSON.parse(LS.get('officeTasks2')||'null')}catch(e){db=null}
 db=db||seed();
 var role='emp',cat=-1,filter='all',openId=null,user=LS.get('officeUser')||'';
-function seed(){return[
-{id:1,cat:1,title:'Холодно в кабинете',loc:'3 этаж, к. 312',who:'Анна',desc:'Батарея еле тёплая.',st:'work',pri:'high',t:Date.now()-86400000,items:[],also:[{who:'Пётр',text:'У нас тоже холодно',t:Date.now()-5400000},{who:'Ольга',text:'Сидим в куртках',t:Date.now()-3000000}]},
-{id:2,cat:3,title:'Течёт кран',loc:'2 этаж, кухня',who:'Игорь',desc:'Капает смеситель.',st:'wait',pri:'norm',t:Date.now()-7200000,items:[{n:'Смеситель',q:1,p:3200},{n:'Сантехнический сифон',q:2,p:450}]},
-{id:3,cat:0,title:'Не горит лампа',loc:'1 этаж, к. 104',who:'Мария',desc:'Над столом у окна.',st:'new',pri:'norm',t:Date.now()-3600000,items:[]}]}
+function seed(){var H=3600000,D=86400000,n=Date.now();return[
+{id:1,cat:1,title:'Холодно в кабинете',loc:'3 этаж, к. 312',who:'Анна',desc:'Батарея еле тёплая, в кабинете +16.',st:'work',pri:'high',t:n-D,items:[],also:[{who:'Пётр',text:'У нас тоже холодно, сидим в куртках',t:n-9*H},{who:'Ольга',text:'Окна не при чём, батарея холодная',t:n-5*H},{who:'Сергей',text:'Утром было +15',t:n-2*H}]},
+{id:2,cat:3,title:'Течёт кран: капает смеситель',loc:'2 этаж, кухня',who:'Игорь',desc:'Капает смеситель, под раковиной лужа.',st:'wait',pri:'norm',t:n-2*H*3,items:[{n:'Смеситель',q:1,p:3200},{n:'Сантехнический сифон',q:2,p:450},{n:'Работа мастера',q:1,p:2500}],ap:'pending',also:[{who:'Мария',text:'Вода уже на полу',t:n-4*H},{who:'Денис',text:'Подтверждаю, течёт сильнее',t:n-3*H}]},
+{id:3,cat:0,title:'Не горит лампа',loc:'1 этаж, к. 104',who:'Мария',desc:'Над столом у окна.',st:'new',pri:'norm',t:n-H,items:[]},
+{id:4,cat:2,title:'Кондиционер шумит',loc:'4 этаж, переговорная',who:'Елена',desc:'Громко гудит, мешает на созвонах.',st:'new',pri:'norm',t:n-30*60000,items:[],also:[{who:'Артём',text:'Гудит с утра',t:n-10*60000}]}]}
 function nl(l){var t=String(l||'').toLowerCase(),n=t.match(/\d+/g)||[],w=t.replace(/\d+/g,' ').split(/[^а-яa-zё]+/).filter(function(x){return x.length>2&&!/^(этаж|кабинет|каб|комната|ком|офис)$/.test(x)}).map(function(x){return x.slice(0,5)});return{cab:n.filter(function(x){return x.length>=3})[0]||'',fl:n.filter(function(x){return x.length<3})[0]||'',w:w}}
 function sameLoc(a,b){var x=nl(a),y=nl(b);if(x.cab&&y.cab)return x.cab==y.cab;var ws=x.w.some(function(k){return y.w.indexOf(k)>=0});if(x.fl&&y.fl&&x.fl!=y.fl)return false;if(x.cab||y.cab){var c=x.cab||y.cab,f=(x.cab?y:x);return !!f.fl&&c.charAt(0)==f.fl&&!f.w.length||ws}return ws||(!!x.fl&&x.fl==y.fl&&!x.w.length&&!y.w.length)}
 function openT(){return db.filter(function(x){return x.st!='done'})}
@@ -94,7 +95,7 @@ function similar(c,l,skip){return openT().filter(function(x){return x.id!=skip&&
 function pl(n){var m=n%10,c=n%100;return n+' '+(m==1&&c!=11?'человек':'человека')}
 function who(x){var n=cnt(x);return(n>=3?'Массовая проблема: ':'Уже ')+'пожаловались '+pl(n)+(n>=3?' — разберите в первую очередь':'')}
 function cnt(x){return 1+(x.also||[]).length}
-function save(){LS.set('officeTasks',JSON.stringify(db,function(k,v){return k=='vids'?undefined:v}))}
+function save(){LS.set('officeTasks2',JSON.stringify(db,function(k,v){return k=='vids'?undefined:v}))}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2200)}
 function mode(m){role=m;openId=null;t1.className=m=='emp'?'on':'';t2.className=m=='mgr'?'on':'';t3.className=m=='boss'?'on':'';render()}
 function ago(t){var m=Math.round((Date.now()-t)/60000);return m<60?m+' мин назад':m<1440?Math.round(m/60)+' ч назад':Math.round(m/1440)+' дн назад'}
