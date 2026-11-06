@@ -66,12 +66,16 @@ td input{padding:7px 9px}
 .mass{display:inline-block;margin-top:6px;background:#fff3d6;color:#8a5200;border:1px solid #f0c765;border-radius:10px;padding:5px 10px;font-size:13px;font-weight:600}.mass.hot{background:#ffe3e0;color:#a31d12;border-color:#f2a69f}
 .card.massc{border-left:5px solid #e08a00}.card.hotc{border-left:5px solid #d93025;background:#fffafa}
 .manybar{width:100%;margin:0 0 14px;padding:12px 14px;border-radius:14px;border:1px solid #f0c765;background:#fff3d6;color:#8a5200;font-size:15px;cursor:pointer;text-align:left}.manybar b{font-size:17px}
+.br{display:grid;grid-template-columns:42% 1fr auto;gap:8px;align-items:center;margin:10px 0;font-size:14px}.bt{background:#e3e6ea;border-radius:8px;height:12px;overflow:hidden}.bt i{display:block;height:100%;background:linear-gradient(90deg,#10b981,#059669);border-radius:8px}.bv{font-weight:700;white-space:nowrap}
+.kv b{white-space:nowrap}.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.tabs button{padding-left:8px;padding-right:8px}
+@media print{.tabs,.filters,.btn,header,.topbar{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
 <header><div class="bar">
 <div class="logo">Офис-задачник</div>
-<div class="tabs"><button id="t1" class="on" onclick="mode('emp')">Я сотрудник</button><button id="t2" onclick="mode('mgr')">Офис-менеджер</button><button id="t3" onclick="mode('boss')">Руководитель</button></div>
+<div class="tabs"><button id="t1" class="on" onclick="mode('emp')">Я сотрудник</button><button id="t2" onclick="mode('mgr')">Офис-менеджер</button><button id="t3" onclick="mode('boss')">Руководитель</button><button id="t4" onclick="mode('rep')">Отчёты</button></div>
 </div></header>
 <main id="app"><noscript>Включите JavaScript или откройте файл в Chrome / Safari.</noscript></main>
 <div class="toast" id="toast"></div>
@@ -87,6 +91,10 @@ function seed(){var H=3600000,D=86400000,n=Date.now();return[
 {id:1,cat:1,title:'Холодно в кабинете',loc:'3 этаж, к. 312',who:'Анна',desc:'Батарея еле тёплая, в кабинете +16.',st:'work',pri:'high',t:n-D,items:[],also:[{who:'Пётр',text:'У нас тоже холодно, сидим в куртках',t:n-9*H},{who:'Ольга',text:'Окна не при чём, батарея холодная',t:n-5*H},{who:'Сергей',text:'Утром было +15',t:n-2*H}]},
 {id:2,cat:3,title:'Течёт кран: капает смеситель',loc:'2 этаж, кухня',who:'Игорь',desc:'Капает смеситель, под раковиной лужа.',st:'wait',pri:'norm',t:n-2*H*3,items:[{n:'Смеситель',q:1,p:3200},{n:'Сантехнический сифон',q:2,p:450},{n:'Работа мастера',q:1,p:2500}],ap:'pending',also:[{who:'Мария',text:'Вода уже на полу',t:n-4*H},{who:'Денис',text:'Подтверждаю, течёт сильнее',t:n-3*H}]},
 {id:3,cat:0,title:'Не горит лампа',loc:'1 этаж, к. 104',who:'Мария',desc:'Над столом у окна.',st:'new',pri:'norm',t:n-H,items:[]},
+{id:5,cat:0,title:'Замена ламп в коридоре',loc:'2 этаж, коридор',who:'Игорь',desc:'Перегорели 4 лампы.',st:'done',pri:'norm',t:n-12*D,items:[{n:'Лампа LED',q:4,p:350}],ap:'ok',apt:n-11*D,also:[{who:'Анна',text:'Темно у лестницы',t:n-12*D+H}]},
+{id:6,cat:5,title:'Склад: сломалась стойка стеллажа',loc:'Склад',who:'Виктор',desc:'Стеллаж накренился.',st:'done',pri:'high',t:n-20*D,items:[{n:'Стойка стеллажа',q:2,p:4200},{n:'Крепёж',q:1,p:900}],ap:'ok',apt:n-19*D},
+{id:7,cat:4,title:'Производство: заменить фильтры',loc:'Цех 1',who:'Николай',desc:'Фильтры забились.',st:'done',pri:'norm',t:n-45*D,items:[{n:'Фильтр',q:6,p:1800}],ap:'ok',apt:n-40*D,also:[{who:'Алексей',text:'Шумит вытяжка',t:n-45*D+H}]},
+{id:8,cat:3,title:'Засор раковины',loc:'3 этаж, туалет',who:'Мария',desc:'Вода не уходит.',st:'done',pri:'norm',t:n-3*D,items:[{n:'Работа сантехника',q:1,p:1800}],ap:'ok',apt:n-2*D},
 {id:4,cat:2,title:'Кондиционер шумит',loc:'4 этаж, переговорная',who:'Елена',desc:'Громко гудит, мешает на созвонах.',st:'new',pri:'norm',t:n-30*60000,items:[],also:[{who:'Артём',text:'Гудит с утра',t:n-10*60000}]}]}
 function nl(l){var t=String(l||'').toLowerCase(),n=t.match(/\d+/g)||[],w=t.replace(/\d+/g,' ').split(/[^а-яa-zё]+/).filter(function(x){return x.length>2&&!/^(этаж|кабинет|каб|комната|ком|офис)$/.test(x)}).map(function(x){return x.slice(0,5)});return{cab:n.filter(function(x){return x.length>=3})[0]||'',fl:n.filter(function(x){return x.length<3})[0]||'',w:w}}
 function sameLoc(a,b){var x=nl(a),y=nl(b);if(x.cab&&y.cab)return x.cab==y.cab;var ws=x.w.some(function(k){return y.w.indexOf(k)>=0});if(x.fl&&y.fl&&x.fl!=y.fl)return false;if(x.cab||y.cab){var c=x.cab||y.cab,f=(x.cab?y:x);return !!f.fl&&c.charAt(0)==f.fl&&!f.w.length||ws}return ws||(!!x.fl&&x.fl==y.fl&&!x.w.length&&!y.w.length)}
@@ -95,14 +103,37 @@ function similar(c,l,skip){return openT().filter(function(x){return x.id!=skip&&
 function pl(n){var m=n%10,c=n%100;return n+' '+(m==1&&c!=11?'человек':'человека')}
 function who(x){var n=cnt(x);return(n>=3?'Массовая проблема: ':'Уже ')+'пожаловались '+pl(n)+(n>=3?' — разберите в первую очередь':'')}
 function cnt(x){return 1+(x.also||[]).length}
+var rp='30';
+function inP(x){return rp=='all'||x.t>=Date.now()-(+rp)*86400000}
+function bars(rows,fmt){var m=Math.max.apply(null,rows.map(function(r){return r[1]}).concat([1]));return rows.length?rows.map(function(r){return'<div class="br"><div class="bl">'+r[0]+'</div><div class="bt"><i style="width:'+Math.round(r[1]/m*100)+'%"></i></div><div class="bv">'+fmt(r[1])+'</div></div>'}).join(''):'<div class="empty">Нет данных</div>'}
+function repData(){var L=db.filter(inP);var o={L:L,n:L.length,done:L.filter(function(x){return x.st=='done'}).length,open:L.filter(function(x){return x.st!='done'}).length,mass:L.filter(function(x){return cnt(x)>1}).length,people:L.reduce(function(a,x){return a+cnt(x)},0)};
+ o.ok=0;o.pend=0;o.no=0;o.draft=0;L.forEach(function(x){var v=sum(x);if(!v)return;if(x.ap=='ok')o.ok+=v;else if(x.ap=='pending')o.pend+=v;else if(x.ap=='no')o.no+=v;else o.draft+=v});o.total=o.ok+o.pend+o.no+o.draft;return o}
+function rep(){var d=repData(),L=d.L,pr=[['7','7 дней'],['30','30 дней'],['90','90 дней'],['all','Всё время']];
+ var byC=CATS.map(function(c,i){return[c[0]+' '+c[1],L.filter(function(x){return x.cat==i}).length,L.filter(function(x){return x.cat==i}).reduce(function(a,x){return a+sum(x)},0)]});
+ var cc=byC.filter(function(r){return r[1]}).sort(function(a,b){return b[1]-a[1]}).map(function(r){return[r[0],r[1]]});
+ var cs=byC.filter(function(r){return r[2]}).sort(function(a,b){return b[2]-a[2]}).map(function(r){return[r[0],r[2]]});
+ var pl2={};L.forEach(function(x){var k=x.loc.trim();pl2[k]=(pl2[k]||0)+cnt(x)});var places=Object.keys(pl2).map(function(k){return[esc(k),pl2[k]]}).sort(function(a,b){return b[1]-a[1]}).slice(0,5);
+ var top=L.filter(function(x){return cnt(x)>1}).sort(function(a,b){return cnt(b)-cnt(a)}).slice(0,5);
+ var h='<h2>Отчёты</h2><div class="filters">'+pr.map(function(f){return'<button class="'+(rp==f[0]?'on':'')+'" onclick="rp=\''+f[0]+'\';render()">'+f[1]+'</button>'}).join('')+'</div>'
+ +'<div class="stats"><div class="stat st-all"><b>'+d.n+'</b>заявок</div><div class="stat st-done"><b>'+d.done+'</b>решено</div><div class="stat st-new"><b>'+d.mass+'</b>массовых проблем</div><div class="stat st-est"><b>'+money(d.total)+'</b>затраты всего</div></div>'
+ +'<div class="card"><h3>Затраты по согласованию</h3><div class="kv"><span>Согласовано руководителем</span><b>'+money(d.ok)+'</b></div><div class="kv"><span>Ждёт согласования</span><b>'+money(d.pend)+'</b></div><div class="kv"><span>Отклонено</span><b>'+money(d.no)+'</b></div><div class="kv"><span>Смета ещё не отправлена</span><b>'+money(d.draft)+'</b></div></div>'
+ +'<div class="card"><h3>На что уходят деньги</h3>'+bars(cs,money)+'</div>'
+ +'<div class="card"><h3>Какие проблемы чаще всего</h3>'+bars(cc,function(v){return v})+'</div>'
+ +'<div class="card"><h3>Где проблем больше всего</h3><div class="meta">Считаются все жалобы, в том числе повторные</div>'+bars(places,function(v){return v})+'</div>'
+ +'<div class="card"><h3>Массовые проблемы</h3>'+(top.length?top.map(function(x){return'<div class="kv"><span>'+CATS[x.cat][0]+' '+esc(x.title)+'<div class="meta">'+esc(x.loc)+' · '+ST[x.st][0]+'</div></span><b>'+pl(cnt(x))+'</b></div>'}).join(''):'<div class="empty">Нет</div>')+'</div>'
+ +'<div class="card"><h3>Выгрузка</h3><div class="meta">Файл откроется в Excel. Печать можно сохранить в PDF.</div><br><button class="btn" onclick="csv()">Скачать в Excel (CSV)</button> <button class="btn sec" onclick="window.print()">Печать / PDF</button></div>';
+ app.innerHTML=h}
+function csv(){var d=repData(),q=function(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"'},apn={ok:'согласовано',pending:'на согласовании',no:'отклонено'};
+ var r=[['Дата','Тип','Заявка','Место','Автор','Жалоб (человек)','Статус','Срочность','Смета, ₽','Согласование','Позиции']].concat(d.L.slice().sort(function(a,b){return b.t-a.t}).map(function(x){return[new Date(x.t).toLocaleDateString('ru-RU'),CATS[x.cat][1],x.title,x.loc,x.who,cnt(x),ST[x.st][0],x.pri=='high'?'срочно':'обычная',sum(x),apn[x.ap]||'',x.items.map(function(i){return i.n+' x'+i.q}).join('; ')]}));
+ var t='\uFEFF'+r.map(function(a){return a.map(q).join(';')}).join('\r\n');var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv;charset=utf-8'}));a.download='otchet-office.csv';document.body.appendChild(a);a.click();a.remove();toast('Файл скачан')}
 function save(){LS.set('officeTasks2',JSON.stringify(db,function(k,v){return k=='vids'?undefined:v}))}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none'},2200)}
-function mode(m){role=m;openId=null;t1.className=m=='emp'?'on':'';t2.className=m=='mgr'?'on':'';t3.className=m=='boss'?'on':'';render()}
+function mode(m){role=m;openId=null;t1.className=m=='emp'?'on':'';t2.className=m=='mgr'?'on':'';t3.className=m=='boss'?'on':'';t4.className=m=='rep'?'on':'';render()}
 function ago(t){var m=Math.round((Date.now()-t)/60000);return m<60?m+' мин назад':m<1440?Math.round(m/60)+' ч назад':Math.round(m/1440)+' дн назад'}
 function sum(x){return x.items.reduce(function(a,i){return a+(+i.q||0)*(+i.p||0)},0)}
 function money(n){return Math.round(n).toLocaleString('ru-RU')+' ₽'}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function render(){role=='emp'?emp():role=='mgr'?mgr():boss()}
+function render(){role=='emp'?emp():role=='mgr'?mgr():role=='rep'?rep():boss()}
 
 function emp(){
  var h='<h2>Что случилось?</h2><div class="card"><div class="cats">'+CATS.map(function(c,i){return'<button class="cat'+(cat==i?' on':'')+'" onclick="cat='+i+';render();chk()"><span class="e">'+c[0]+'</span>'+c[1]+'</button>'}).join('')+'</div>'
@@ -184,14 +215,21 @@ function apBlock(x){
  if(sum(x)>0&&x.ap!='pending'&&x.ap!='ok')h+='<br><button class="btn sm" onclick="toAp('+x.id+')">Отправить смету на согласование</button>';
  return h}
 function toAp(id){var x=find(id);x.ap='pending';x.note='';save();toast('Отправлено руководителю');render()}
+var bp='30';
 function boss(){
  var p=db.filter(function(x){return x.ap=='pending'});
  var h='<h2>На согласование</h2>';
  h+=p.length?p.map(function(x){return'<div class="card"><h3>'+CATS[x.cat][0]+' '+esc(x.title)+'</h3><div class="meta">'+esc(x.loc)+' · '+esc(x.who)+'</div>'+mediaHtml(x)+'<table><tr><th>Позиция</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr>'+x.items.map(function(i){return'<tr><td>'+esc(i.n)+'</td><td>'+i.q+'</td><td>'+money(i.p)+'</td><td>'+money(i.q*i.p)+'</td></tr>'}).join('')+'</table><div class="tot">Итого: '+money(sum(x))+'</div><br><button class="btn sm" onclick="dec('+x.id+',true)">Согласовать</button> <button class="btn sec sm" onclick="dec('+x.id+',false)">Отклонить</button></div>'}).join(''):'<div class="empty">Нет смет на согласовании</div>';
- var ok=db.filter(function(x){return x.ap=='ok'}).reduce(function(a,x){return a+sum(x)},0);
- h+='<div class="card">Согласовано всего: <b>'+money(ok)+'</b></div>';
+ var bpr=[['7','7 дней'],['30','30 дней'],['90','90 дней'],['all','Всё время']];
+ var A=db.filter(function(x){var t=x.apt||x.t;return x.ap=='ok'&&(bp=='all'||t>=Date.now()-(+bp)*86400000)}).sort(function(a,b){return(b.apt||b.t)-(a.apt||a.t)});
+ var tot=A.reduce(function(a,x){return a+sum(x)},0);
+ var rows=CATS.map(function(c,i){var l=A.filter(function(x){return x.cat==i});return[c[0]+' '+c[1]+' · '+l.length,l.reduce(function(a,x){return a+sum(x)},0)]}).filter(function(r){return r[1]}).sort(function(a,b){return b[1]-a[1]});
+ h+='<h2 style="margin-top:28px">Что я согласовал</h2><div class="filters">'+bpr.map(function(f){return'<button class="'+(bp==f[0]?'on':'')+'" onclick="bp=\''+f[0]+'\';render()">'+f[1]+'</button>'}).join('')+'</div>'
+ +'<div class="card"><div class="meta">Согласовано за период</div><div style="font-size:34px;font-weight:700;margin:4px 0">'+money(tot)+'</div><div class="meta">заявок: '+A.length+(A.length?' · средняя '+money(tot/A.length):'')+'</div></div>'
+ +'<div class="card"><h3>По категориям</h3>'+bars(rows,money)+'</div>'
+ +'<div class="card"><h3>Согласованные заявки</h3>'+(A.length?A.map(function(x){return'<div class="kv"><span>'+CATS[x.cat][0]+' '+esc(x.title)+'<div class="meta">'+esc(x.loc)+' · согласовано '+new Date(x.apt||x.t).toLocaleDateString('ru-RU')+' · '+ST[x.st][0]+'</div></span><b>'+money(sum(x))+'</b></div>'}).join(''):'<div class="empty">За этот период ничего не согласовано</div>')+'</div>';
  app.innerHTML=h}
-function dec(id,ok){var x=find(id);x.ap=ok?'ok':'no';if(ok){x.st='wait'}else{x.st='work';x.note=prompt('Причина отказа (необязательно)')||''}save();toast(ok?'Согласовано':'Отклонено');render()}
+function dec(id,ok){var x=find(id);x.ap=ok?'ok':'no';x.apt=Date.now();if(ok){x.st='wait'}else{x.st='work';x.note=prompt('Причина отказа (необязательно)')||''}save();toast(ok?'Согласовано':'Отклонено');render()}
 function find(id){return db.filter(function(x){return x.id==id})[0]}
 function setSt(id,s){find(id).st=s;save();toast('Статус: '+ST[s][0]);render()}
 function addI(id){find(id).items.push({n:'',q:1,p:0});save();render()}
